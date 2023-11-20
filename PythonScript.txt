@@ -1,0 +1,355 @@
+
+## Input Quarter Report:
+2023Q4_10
+
+## In SQLMS
+create database lteAudit1_2023Q4_10
+create database lteAudit2_2023Q4_10
+create database lteAudit3_2023Q4_10
+
+
+## In Windows Shell
+#setx PATH "%PATH%;C:\Users\c00298579\AppData\Local\Programs\Python\Python39\Scripts"
+
+## In Windows Shell
+# install python pip
+# https://stackoverflow.com/questions/23708898/pip-is-not-recognized-as-an-internal-or-external-command
+# En windows terminal, only one time, not each audit
+pip install pyodbc
+
+## In Python
+#How to Create a Table in SQL Server using Python
+#https://datatofish.com/create-table-sql-server-python/
+
+#How to Make Inserts Into SQL Server 100x faster with Pyodbc
+#https://towardsdatascience.com/how-i-made-inserts-into-sql-server-100x-faster-with-pyodbc-5a0b5afdba5
+
+#Connecting to MS SQL Server with Windows Authentication using Python?
+#https://stackoverflow.com/questions/16515420/connecting-to-ms-sql-server-with-windows-authentication-using-python
+
+# lteAudit1:
+# Rename files
+# https://stackoverflow.com/questions/37467561/renaming-multiple-files-in-a-directory-using-python
+import os
+path = 'D:/SQL/2023Q4_10/Rename_lteAudit1/'
+files = os.listdir(path)
+lteAudit="lteAudit1_"
+lteAudit1FileNumber = 0
+
+for index, file in enumerate(files):
+    os.rename(os.path.join(path, file), os.path.join(path, ''.join([lteAudit, str(index), '.csv'])))
+    lteAudit1FileNumber = index
+
+# lteAudit2:
+# Rename files
+# https://stackoverflow.com/questions/37467561/renaming-multiple-files-in-a-directory-using-python
+import os
+path = 'D:/SQL/2023Q4_10/Rename_lteAudit2/'
+files = os.listdir(path)
+lteAudit="lteAudit2_"
+lteAudit2FileNumber = 0
+
+for index, file in enumerate(files):
+    os.rename(os.path.join(path, file), os.path.join(path, ''.join([lteAudit, str(index), '.csv'])))
+    lteAudit2FileNumber = index
+	
+# lteAudit3:
+# Rename files
+# https://stackoverflow.com/questions/37467561/renaming-multiple-files-in-a-directory-using-python
+import os
+path = 'D:/SQL/2023Q4_10/Rename_lteAudit3/'
+files = os.listdir(path)
+lteAudit="lteAudit3_"
+lteAudit3FileNumber = 0
+
+for index, file in enumerate(files):
+    os.rename(os.path.join(path, file), os.path.join(path, ''.join([lteAudit, str(index), '.csv'])))
+    lteAudit3FileNumber = index
+
+
+# lteAudit1-3:
+import fileinput
+
+# lteAudit1:
+import pyodbc
+cnxn = pyodbc.connect(r'Driver=SQL Server;Server=LAPTOP-UNVM0A4T\SQLEXPRESS;Database=lteAudit1_2023Q4_10;Trusted_Connection=yes;')
+cursor = cnxn.cursor()
+cursor.execute("Use [lteAudit1_2023Q4_10]")
+# lteAudit2:
+import pyodbc
+cnxn = pyodbc.connect(r'Driver=SQL Server;Server=LAPTOP-UNVM0A4T\SQLEXPRESS;Database=lteAudit2_2023Q4_10;Trusted_Connection=yes;')
+cursor = cnxn.cursor()
+cursor.execute("Use [lteAudit2_2023Q4_10]")
+# lteAudit3:
+import pyodbc
+cnxn = pyodbc.connect(r'Driver=SQL Server;Server=LAPTOP-UNVM0A4T\SQLEXPRESS;Database=lteAudit3_2023Q4_10;Trusted_Connection=yes;')
+cursor = cnxn.cursor()
+cursor.execute("Use [lteAudit3_2023Q4_10]")
+
+# lteAudit1-3:
+cursor.execute('''
+	Create Table enodebTable60MinReg
+	(
+	StartTime DATETIME,
+	Period INT,
+	NeName VARCHAR(45),
+	eNodeBFunction VARCHAR(45),
+	CellID VARCHAR(45),
+	CellName VARCHAR(45),
+	eNodeBID VARCHAR(45),
+	CellFDDTDDInd VARCHAR(45),
+	TrafficUserMax DECIMAL(20,5),
+	TrafficUserAvg DECIMAL(20,5)
+	)
+	''')
+cursor.execute('''
+	Create Table enodebTable60MinReg_Total
+	(
+	StartTime DATETIME,
+	Period INT,
+	NeName VARCHAR(45),
+	eNodeBFunction VARCHAR(45),
+	CellID VARCHAR(45),
+	CellName VARCHAR(45),
+	eNodeBID VARCHAR(45),
+	TrafficUserMax DECIMAL(20,5),
+	TrafficUserAvg DECIMAL(20,5)
+	)
+	''')
+
+#How to Run the SQL Server BULK INSERT Command from Within a Python Program
+#https://www.sqlnethub.com/blog/how-to-run-the-sql-server-bulk-insert-command-from-within-a-python-program/
+# lteAudit1-3:
+bulkInsertCommand_Part1='''
+	BULK 
+	INSERT dbo.enodebTable60MinReg
+	FROM 'D:/SQL/2023Q4_10/'''
+bulkInsertCommand_Part2='''.csv'
+	WITH
+	(
+	FIRSTROW = 2,
+	FIELDTERMINATOR = ',',
+	ROWTERMINATOR = '0x0a'
+	)
+	'''	
+#x is 0 to lteAudit1FileNumber for 2023Q4_10, if error load one by one and replace " DST," in Start time column by ","
+# lteAudit1 Month1 of Q:
+for x in range(0, lteAudit1FileNumber+1):
+  fileNumber = 'lteAudit1_'+str(x)
+  with fileinput.FileInput('D:/SQL/2023Q4_10/'+'Rename_lteAudit1/'+fileNumber+'.csv', inplace=True, backup='.bak') as file:
+    for line in file:
+      print(line.replace(' DST,', ' ,'), end='')
+# lteAudit2 Month2 of Q:
+for x in range(0, lteAudit2FileNumber+1):
+  fileNumber = 'lteAudit2_'+str(x)
+  with fileinput.FileInput('D:/SQL/2023Q4_10/'+'Rename_lteAudit2/'+fileNumber+'.csv', inplace=True, backup='.bak') as file:
+    for line in file:
+      print(line.replace(' DST,', ' ,'), end='')
+# lteAudit3 Month3 of Q:
+for x in range(0, lteAudit3FileNumber+1):
+  fileNumber = 'lteAudit3_'+str(x)
+  with fileinput.FileInput('D:/SQL/2023Q4_10/'+'Rename_lteAudit3/'+fileNumber+'.csv', inplace=True, backup='.bak') as file:
+    for line in file:
+      print(line.replace(' DST,', ' ,'), end='')
+for x in range(0, lteAudit3FileNumber+1):
+  fileNumber = 'lteAudit3_'+str(x)
+  with fileinput.FileInput('D:/SQL/2023Q4_10/'+'Rename_lteAudit3/'+fileNumber+'.csv', inplace=True, backup='.bak') as file:
+    for line in file:
+      print(line.replace(',NIL', ',0'), end='')
+
+# lteAudit1 Month1 of Q:
+for x in range(0, lteAudit1FileNumber):
+   fileNumber = 'lteAudit1_'+str(x)
+   print('lteAudit1_'+str(x))
+   bulkInsertCommand=bulkInsertCommand_Part1+'Rename_lteAudit1/'+fileNumber+bulkInsertCommand_Part2
+   cursor.execute(bulkInsertCommand)
+   cnxn.commit()
+# lteAudit2 Month2 of Q:
+for x in range(0, lteAudit2FileNumber+1):
+   fileNumber = 'lteAudit2_'+str(x)
+   print('lteAudit2_'+str(x))
+   bulkInsertCommand=bulkInsertCommand_Part1+'Rename_lteAudit2/'+fileNumber+bulkInsertCommand_Part2
+   cursor.execute(bulkInsertCommand)
+   cnxn.commit()
+# lteAudit3 Month3 of Q:
+for x in range(0, lteAudit3FileNumber+1):
+   fileNumber = 'lteAudit3_'+str(x)
+   print('lteAudit3_'+str(x))
+   bulkInsertCommand=bulkInsertCommand_Part1+'Rename_lteAudit3/'+fileNumber+bulkInsertCommand_Part2
+   cursor.execute(bulkInsertCommand)
+   cnxn.commit()
+   
+   
+   
+#	/* Step 3: Create enodebTable60MinReg_AddingCells table per eNodeB */
+# lteAudit1-3:
+
+cursor.execute('''
+	Create Table enodebTable60MinReg_AddingCells
+	(
+	StartTime DATETIME,
+	NeName VARCHAR(45),
+	TrafficUserMax DECIMAL(20,5),
+	TrafficUserAvg DECIMAL(20,5)
+	)
+	''')
+	
+	
+
+# /* Step 3.1: Insert addition of all cell value on the hour per eNodeB */
+
+	
+#Insert Table Values From One Database To Another Database
+#https://www.c-sharpcorner.com/blogs/insert-from-one-table-to-another-both-tables-are-from-diffrent-database-in-sql-server1#:~:text=INSERT%20INTO%20SQL%20statement%20is,tables%20in%20the%20same%20database.
+
+# lteAudit1:
+cursor.execute('''
+	INSERT INTO lteAudit1_2023Q4_10.dbo.enodebTable60MinReg_AddingCells
+	SELECT StartTime, NeName, sum(TrafficUserMax), sum(TrafficUserAvg) FROM lteAudit1_2023Q4_10.dbo.enodebTable60MinReg
+	GROUP BY StartTime, NeName ORDER BY StartTime ASC
+		''')
+# lteAudit2:
+cursor.execute('''
+	INSERT INTO lteAudit2_2023Q4_10.dbo.enodebTable60MinReg_AddingCells
+	SELECT StartTime, NeName, sum(TrafficUserMax), sum(TrafficUserAvg) FROM lteAudit2_2023Q4_10.dbo.enodebTable60MinReg
+	GROUP BY StartTime, NeName ORDER BY StartTime ASC
+		''')
+# lteAudit3:
+cursor.execute('''
+	INSERT INTO lteAudit3_2023Q4_10.dbo.enodebTable60MinReg_AddingCells
+	SELECT StartTime, NeName, sum(TrafficUserMax), sum(TrafficUserAvg) FROM lteAudit3_2023Q4_10.dbo.enodebTable60MinReg
+	GROUP BY StartTime, NeName ORDER BY StartTime ASC
+		''')
+		
+#/* Step 4: Create table All_Network_PerHour to store the Avg and Max user values for all the network */
+
+# lteAudit1-3:
+cursor.execute('''
+	Create Table All_Network_PerHour
+	(
+	StartTime DATETIME,
+	TrafficUserMax DECIMAL(20,5),
+	TrafficUserAvg DECIMAL(20,5)
+	)
+	''')
+
+#/* Step 4.1: Insert addition of all cell value on the hour per eNodeB */
+	
+# lteAudit1:
+cursor.execute('''
+	INSERT INTO lteAudit1_2023Q4_10.dbo.All_Network_PerHour
+	SELECT StartTime, sum(TrafficUserMax), sum(TrafficUserAvg) FROM lteAudit1_2023Q4_10.dbo.enodebTable60MinReg
+	GROUP BY StartTime ORDER BY StartTime ASC
+		''')
+# lteAudit2:
+cursor.execute('''
+	INSERT INTO lteAudit2_2023Q4_10.dbo.All_Network_PerHour
+	SELECT StartTime, sum(TrafficUserMax), sum(TrafficUserAvg) FROM lteAudit2_2023Q4_10.dbo.enodebTable60MinReg
+	GROUP BY StartTime ORDER BY StartTime ASC
+		''')
+# lteAudit3:
+cursor.execute('''
+	INSERT INTO lteAudit3_2023Q4_10.dbo.All_Network_PerHour
+	SELECT StartTime, sum(TrafficUserMax), sum(TrafficUserAvg) FROM lteAudit3_2023Q4_10.dbo.enodebTable60MinReg
+	GROUP BY StartTime ORDER BY StartTime ASC
+		''')
+
+	
+# /* Step 5: Create All_Network_PerHour_WitoutTime table */
+# lteAudit1-3:
+cursor.execute('''
+	Create Table All_Network_PerHour_WitoutTime
+	(
+	StartTime DATETIME,
+	TrafficUserMax DECIMAL(20,5),
+	TrafficUserAvg DECIMAL(20,5)
+	)
+	''')
+
+# lteAudit1-3:
+# /* Step 4.1: Insert data into table by day */
+cursor.execute('''
+	INSERT INTO All_Network_PerHour_WitoutTime (StartTime, TrafficUserMax, TrafficUserAvg)
+	(SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, StartTime)), TrafficUserMax, TrafficUserAvg FROM All_Network_PerHour)
+	''')
+
+# /* Step 6: All_Network_UserMaxValuesEachDay table: To store peak of User Max for each day */
+# lteAudit1-3:
+cursor.execute('''
+	Create Table All_Network_UserMaxValuesEachDay
+	(
+	StartTime DATETIME,
+	TrafficUserMax DECIMAL(20,5),
+	TrafficUserAvg DECIMAL(20,5)
+	)
+	''')
+	
+#/* Step 5.1: Insert peak hour highest UserMax values for each days */
+# lteAudit1-3:
+cursor.execute('''
+	INSERT INTO All_Network_UserMaxValuesEachDay
+	select cur.StartTime, cur.TrafficUserMax, cur.TrafficUserAvg
+	from All_Network_PerHour_WitoutTime cur
+	where not exists (
+		select * 
+		from All_Network_PerHour_WitoutTime high 
+		where high.StartTime = cur.StartTime
+		and high.TrafficUserAvg > cur.TrafficUserAvg
+	) ORDER BY TrafficUserMax DESC
+	''')
+	cnxn.commit()
+
+# python pyodbc sql export to csv
+# https://datatofish.com/export-sql-table-to-csv-python/
+
+In windows command shell: pip install pandas
+
+# lteAudit1-3:
+import pandas as pd
+
+# lteAudit1:
+sql_query = pd.read_sql_query('''
+                              SELECT * FROM All_Network_UserMaxValuesEachDay ORDER BY TrafficUserAvg DESC
+                              '''
+                              ,cnxn) # here, the 'conn' is the variable that contains your database connection information from step 2
+df = pd.DataFrame(sql_query)
+df.to_csv (r'D:\SQL\2023Q4_10\lteAudit1_Network_UserMaxValuesEachDay.csv', index = False) # place 'r' before the path name
+
+# lteAudit2:
+sql_query = pd.read_sql_query('''
+                              SELECT * FROM All_Network_UserMaxValuesEachDay ORDER BY TrafficUserAvg DESC
+                              '''
+                              ,cnxn) # here, the 'conn' is the variable that contains your database connection information from step 2
+df = pd.DataFrame(sql_query)
+df.to_csv (r'D:\SQL\2023Q4_10\lteAudit2_Network_UserMaxValuesEachDay.csv', index = False) # place 'r' before the path name
+
+# lteAudit3:
+sql_query = pd.read_sql_query('''
+                              SELECT * FROM All_Network_UserMaxValuesEachDay ORDER BY TrafficUserAvg DESC
+                              '''
+                              ,cnxn) # here, the 'conn' is the variable that contains your database connection information from step 2
+df = pd.DataFrame(sql_query)
+df.to_csv (r'D:\SQL\2023Q4_10\lteAudit3_Network_UserMaxValuesEachDay.csv', index = False) # place 'r' before the path name
+
+
+# /* Step 7: Obtain the day and hour of the third maximum value in the All_Network_UserMaxValuesEachDay table (Desired value of the report)*/
+
+sql_query2 = pd.read_sql_query('''
+                              SELECT * FROM All_Network_PerHour WHERE TrafficUserAvg = '2044893.47'
+                              '''
+                              ,cnxn) # here, the 'conn' is the variable that contains your database connection information from step 2
+
+df2 = pd.DataFrame(sql_query2)
+df2.to_csv (r'D:\SQL\2023Q4_10\DayAndHour_3rdMax_inAll_Network.csv', index = False) # place 'r' before the path name
+
+# /* Step 8: Obtain the data for the traffic of all the eNodeBs for the selected day and hour*/
+
+
+sql_query3 = pd.read_sql_query('''
+                              SELECT * FROM enodebTable60MinReg_AddingCells WHERE StartTime = '9/29/2023 18:00' ORDER BY NeName ASC
+                              '''
+                              ,cnxn) # here, the 'conn' is the variable that contains your database connection information from step 2
+
+df3 = pd.DataFrame(sql_query3)
+df3.to_csv (r'D:\SQL\2023Q4_10\dataOfTraffic_allEnodeBs_AtPeak.csv', index = False) # place 'r' before the path name
+
